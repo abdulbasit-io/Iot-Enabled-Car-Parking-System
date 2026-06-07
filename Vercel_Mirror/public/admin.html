@@ -323,6 +323,37 @@
         .log-msg {
             word-break: break-all;
         }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px 10px;
+            }
+            .container {
+                gap: 15px;
+            }
+            header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+                align-items: center;
+            }
+            .mode-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .mode-btn {
+                padding: 12px;
+                font-size: 0.8rem;
+                cursor: not-allowed;
+            }
+            .power-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .terminal {
+                height: 200px;
+            }
+        }
     </style>
 </head>
 <body>

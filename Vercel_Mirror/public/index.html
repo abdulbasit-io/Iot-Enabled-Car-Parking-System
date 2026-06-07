@@ -435,6 +435,40 @@
             border-color: var(--accent);
             background: rgba(99, 102, 241, 0.05);
         }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px 10px;
+            }
+            .container {
+                gap: 15px;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+            .card {
+                padding: 18px 15px;
+                border-radius: 16px;
+            }
+            .occupancy-body {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .stat-details {
+                flex-direction: row;
+                justify-content: center;
+                gap: 20px;
+                width: 100%;
+            }
+            .slots-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .slot-card {
+                padding: 10px 4px;
+            }
+        }
     </style>
 </head>
 <body>
