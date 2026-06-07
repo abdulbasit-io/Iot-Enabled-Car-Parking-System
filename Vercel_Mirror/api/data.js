@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
 
   try {
     if (type === 'history') {
-      const url = `https://${firebaseHost}/parking/history.json?auth=${firebaseAuth}&limitToLast=30`;
+      const url = `https://${firebaseHost}/parking/history.json?auth=${firebaseAuth}&orderBy="$key"&limitToLast=30`;
       const historyData = await fetchUrl(url);
       return res.status(200).json(historyData || {});
     } else {
