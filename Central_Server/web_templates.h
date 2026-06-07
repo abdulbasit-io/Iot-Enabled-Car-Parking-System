@@ -643,7 +643,9 @@ const char ADMIN_HTML[] PROGMEM = R"rawliteral(
             --glass-border: rgba(255, 255, 255, 0.05);
             --accent: #6366f1;
             --emerald: #10b981;
+            --emerald-glow: rgba(16, 185, 129, 0.15);
             --crimson: #ef4444;
+            --crimson-glow: rgba(239, 68, 68, 0.15);
             --text-main: #f8fafc;
             --text-mute: #94a3b8;
         }
@@ -817,6 +819,163 @@ const char ADMIN_HTML[] PROGMEM = R"rawliteral(
             color: var(--emerald);
         }
 
+        /* Occupancy Gauge Widget */
+        .occupancy-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            gap: 20px;
+            padding: 10px 0;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 12;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 439.8;
+            stroke-dashoffset: 439.8;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .gauge-label {
+            font-size: 0.75rem;
+            color: var(--text-mute);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .stat-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        .stat-color.occupied { background-color: var(--crimson); }
+        .stat-color.available { background-color: var(--emerald); }
+
+        .stat-val {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .stat-desc {
+            font-size: 0.8rem;
+            color: var(--text-mute);
+        }
+
+        /* Gate Status Widget */
+        .gate-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 15px;
+            min-height: 140px;
+        }
+
+        .gate-beacon {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.5rem;
+            transition: all 0.5s ease;
+        }
+
+        .gate-beacon.open {
+            border-color: var(--emerald);
+            box-shadow: 0 0 20px var(--emerald-glow);
+            animation: pulse-green 2s infinite;
+        }
+
+        .gate-beacon.closed {
+            border-color: var(--crimson);
+            box-shadow: 0 0 20px var(--crimson-glow);
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .gate-label-status {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+
+        .gate-label-status.open { color: var(--emerald); }
+        .gate-label-status.closed { color: var(--crimson); }
+
+        .full-warning {
+            color: var(--crimson);
+            background: rgba(239, 110, 110, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            animation: flash 1.5s infinite;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
         /* Power Stats Card */
         .power-grid {
             display: grid;
@@ -942,6 +1101,52 @@ const char ADMIN_HTML[] PROGMEM = R"rawliteral(
             </div>
         </header>
 
+        <!-- Top Widgets Row (Occupancy & Gate) -->
+        <div class="grid-2">
+            <!-- Occupancy -->
+            <div class="card">
+                <div class="card-title">Real-Time Occupancy</div>
+                <div class="occupancy-body">
+                    <div class="gauge-container">
+                        <svg class="gauge-svg" width="140" height="140">
+                            <circle class="gauge-bg" cx="70" cy="70" r="60"></circle>
+                            <circle class="gauge-fill" id="occupancyRing" cx="70" cy="70" r="60"></circle>
+                        </svg>
+                        <div class="gauge-text">
+                            <div class="gauge-number" id="occCount">0</div>
+                            <div class="gauge-label">Occupied</div>
+                        </div>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-item">
+                            <div class="stat-color occupied"></div>
+                            <div>
+                                <div class="stat-val" id="lblOccupied">0</div>
+                                <div class="stat-desc">Full Slots</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-color available"></div>
+                            <div>
+                                <div class="stat-val" id="lblAvailable">10</div>
+                                <div class="stat-desc">Empty Slots</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gate Status -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-title">Gate Security</div>
+                <div class="gate-body">
+                    <div class="gate-beacon" id="gateBeacon">🔒</div>
+                    <div class="gate-label-status" id="gateStatusText">CLOSED</div>
+                    <div class="full-warning" id="fullWarning" style="display: none;">PARKING LOT FULL</div>
+                </div>
+            </div>
+        </div>
+
         <!-- System Controls row -->
         <div class="grid-2">
             <!-- Mode Config -->
@@ -1060,6 +1265,35 @@ const char ADMIN_HTML[] PROGMEM = R"rawliteral(
                 const dataRes = await fetch('/api/data');
                 const data = await dataRes.json();
                 
+                // Update Occupancy Gauge
+                const circle = document.getElementById('occupancyRing');
+                const percent = (data.occupied / 10) * 100;
+                const circumference = 2 * Math.PI * 60; // 376.99
+                const offset = circumference - (percent / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+                document.getElementById('occCount').innerText = data.occupied;
+                document.getElementById('lblOccupied').innerText = data.occupied;
+                document.getElementById('lblAvailable').innerText = 10 - data.occupied;
+
+                // Update Gate Status
+                const beacon = document.getElementById('gateBeacon');
+                const gateText = document.getElementById('gateStatusText');
+                const warning = document.getElementById('fullWarning');
+
+                if (data.gateOpen) {
+                    beacon.innerText = '🔓';
+                    beacon.className = 'gate-beacon open';
+                    gateText.innerText = 'OPEN';
+                    gateText.className = 'gate-label-status open';
+                } else {
+                    beacon.innerText = '🔒';
+                    beacon.className = 'gate-beacon closed';
+                    gateText.innerText = 'CLOSED';
+                    gateText.className = 'gate-label-status closed';
+                }
+
+                warning.style.display = (data.occupied >= 10 && !data.gateOpen) ? 'block' : 'none';
+
                 // Set power telemetry
                 document.getElementById('p-curr').innerText = data.current.toFixed(2) + ' A';
                 document.getElementById('p-volt').style.color = '#38bdf8'; // Force colour
