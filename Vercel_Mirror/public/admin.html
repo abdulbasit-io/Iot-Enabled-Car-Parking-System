@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center (Cloud)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Authenticate immediately on page load -->
+    <script>
+        if (localStorage.getItem("admin_auth") !== "true") {
+            let pw = prompt("Enter Admin Password:");
+            if (pw === "admin123") {
+                localStorage.setItem("admin_auth", "true");
+            } else {
+                alert("Access Denied!");
+                window.location.href = "/";
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-grad: linear-gradient(135deg, #090d16 0%, #111026 100%);
+            --glass-bg: rgba(15, 23, 42, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --accent: #6366f1;
+            --emerald: #10b981;
+            --crimson: #ef4444;
+            --text-main: #f8fafc;
+            --text-mute: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-grad);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Stale Banner */
+        .stale-banner {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 15px 20px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.1);
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+        }
+
+        h1 span {
+            color: #f43f5e; /* Rose admin accent */
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn.logout {
+            border-color: rgba(244, 63, 94, 0.3);
+            color: #fb7185;
+            background: rgba(244, 63, 94, 0.05);
+        }
+
+        .btn.logout:hover {
+            background: rgba(244, 63, 94, 0.15);
+            border-color: #f43f5e;
+        }
+
+        /* Cards Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-mute);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* System Operations Card */
+        .mode-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.01);
+            color: rgba(255, 255, 255, 0.2);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-btn.active {
+            color: var(--text-main);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.08);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .sys-state {
+            margin-top: 20px;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .state-val {
+            font-weight: 600;
+            color: var(--emerald);
+        }
+
+        .read-only-badge {
+            font-size: 0.7rem;
+            background: rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.3);
+            padding: 2px 8px;
+            border-radius: 8px;
+        }
+
+        /* Power Stats Card */
+        .power-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .power-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-align: center;
+        }
+
+        .power-lbl {
+            font-size: 0.75rem;
+            color: var(--text-mute);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .power-val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #38bdf8; /* Cyan telemetry */
+        }
+
+        /* Node Status Card */
+        .nodes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .node-row-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .node-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .node-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .node-mac-val {
+            font-size: 0.7rem;
+            font-family: monospace;
+            color: var(--text-mute);
+        }
+
+        .node-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--crimson);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .node-dot.online {
+            background-color: var(--emerald);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Logs Console */
+        .console-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal {
+            background: #020617;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            color: #a7f3d0; /* Soft green terminals */
+        }
+
+        .log-line {
+            line-height: 1.4;
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-tstamp {
+            color: #6366f1;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .log-msg {
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Stale Warning Banner -->
+        <div id="staleBanner" class="stale-banner" style="display: none;">
+            <span>⚠️ Live Connection Stale: The physical central server appears to be offline.</span>
+            <span id="staleTimeAgo" style="font-size: 0.8rem; font-weight: normal; color: var(--text-mute);">Last active: --</span>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <h1>Admin <span>Control Panel</span></h1>
+            <div class="header-actions">
+                <button class="btn" onclick="goHome()">🏠 Public View</button>
+                <button class="btn logout" onclick="logout()">🔒 Lock</button>
+            </div>
+        </header>
+
+        <!-- System Controls row -->
+        <div class="grid-2">
+            <!-- Mode Config -->
+            <div class="card">
+                <div class="card-title">
+                    <span>System Operations Mode</span>
+                    <span class="read-only-badge">Cloud Read-Only</span>
+                </div>
+                <div class="mode-row">
+                    <button class="mode-btn" id="btn-auto">🤖 AUTO</button>
+                    <button class="mode-btn" id="btn-online">🌐 FORCE ONLINE</button>
+                    <button class="mode-btn" id="btn-offline">📡 FORCE OFFLINE</button>
+                </div>
+                <div class="sys-state">
+                    <span>Active Network Mode:</span>
+                    <span class="state-val" id="activeModeText">LOADING...</span>
+                </div>
+            </div>
+
+            <!-- ESP-NOW Nodes Monitor -->
+            <div class="card">
+                <div class="card-title">ESP-NOW Sensor Health</div>
+                <div class="nodes-container">
+                    <div class="node-row-item">
+                        <div class="node-meta">
+                            <span class="node-name">⬅️ Left Side Node (L1-L5)</span>
+                            <span class="node-mac-val" id="leftMac">--:--:--:--:--:--</span>
+                        </div>
+                        <div class="node-dot" id="leftDot"></div>
+                    </div>
+                    <div class="node-row-item">
+                        <div class="node-meta">
+                            <span class="node-name">➡️ Right Side Node (R1-R5)</span>
+                            <span class="node-mac-val" id="rightMac">--:--:--:--:--:--</span>
+                        </div>
+                        <div class="node-dot" id="rightDot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetry and Logs row -->
+        <div class="grid-2">
+            <!-- Logs Console -->
+            <div class="card console-card">
+                <div class="card-title">
+                    <span>📋 Live Audit Logs (Firebase)</span>
+                    <button class="btn" style="padding: 3px 10px; font-size: 0.75rem;" onclick="clearLogs()">Clear Screen</button>
+                </div>
+                <div class="terminal" id="terminalConsole">
+                    <!-- Logs generated here -->
+                </div>
+            </div>
+
+            <!-- Power Telemetry -->
+            <div class="card">
+                <div class="card-title">⚡ Power monitoring</div>
+                <div class="power-grid">
+                    <div class="power-item">
+                        <div class="power-lbl">Current</div>
+                        <div class="power-val" id="p-curr">0.00 A</div>
+                    </div>
+                    <div class="power-item">
+                        <div class="power-lbl">Voltage</div>
+                        <div class="power-val" id="p-volt">0.00 V</div>
+                    </div>
+                    <div class="power-item">
+                        <div class="power-lbl">Power</div>
+                        <div class="power-val" id="p-pow">0.00 W</div>
+                    </div>
+                    <div class="power-item">
+                        <div class="power-lbl">Est. Daily Energy</div>
+                        <div class="power-val" id="p-energy">0.00 kWh</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AJAX Scripts for admin functionality -->
+    <script>
+        let localLoggedTimeStrings = new Set();
+        const staleThresholdMs = 120000; // 2 minutes
+
+        function goHome() {
+            window.location.href = "/";
+        }
+
+        function logout() {
+            localStorage.removeItem("admin_auth");
+            window.location.href = "/";
+        }
+
+        function updateModeButtons(sysMode) {
+            document.getElementById('btn-auto').className = 'mode-btn' + (sysMode === 0 ? ' active' : '');
+            document.getElementById('btn-online').className = 'mode-btn' + (sysMode === 1 ? ' active' : '');
+            document.getElementById('btn-offline').className = 'mode-btn' + (sysMode === 2 ? ' active' : '');
+        }
+
+        function clearLogs() {
+            document.getElementById('terminalConsole').innerHTML = '';
+            localLoggedTimeStrings.clear();
+        }
+
+        async function pollAdminData() {
+            try {
+                // Get basic data from Vercel endpoint
+                const dataRes = await fetch('/api/data');
+                const data = await dataRes.json();
+                
+                if (!data || Object.keys(data).length === 0) {
+                    throw new Error("Empty data returned");
+                }
+
+                // Connection stale check
+                const lastUpdatedTime = data.timestamp || 0;
+                const timeDiffMs = Date.now() - lastUpdatedTime;
+                
+                const banner = document.getElementById('staleBanner');
+                const timeAgoLabel = document.getElementById('staleTimeAgo');
+
+                if (timeDiffMs > staleThresholdMs) {
+                    banner.style.display = 'flex';
+                    const minutesAgo = Math.floor(timeDiffMs / 60000);
+                    timeAgoLabel.innerText = `Last active: ${minutesAgo}m ago (${new Date(lastUpdatedTime).toLocaleTimeString()})`;
+                } else {
+                    banner.style.display = 'none';
+                }
+
+                // Set power telemetry
+                document.getElementById('p-curr').innerText = (data.powerUsage / 5.00).toFixed(2) + ' A';
+                document.getElementById('p-volt').innerText = '5.00 V'; 
+                document.getElementById('p-pow').innerText = data.powerUsage.toFixed(2) + ' W';
+                document.getElementById('p-energy').innerText = (data.powerUsage * 24 / 1000).toFixed(3) + ' kWh';
+                
+                // Get operating mode
+                let configStr = 'AUTO';
+                if (data.sysMode === 1) configStr = 'FORCE ONLINE';
+                if (data.sysMode === 2) configStr = 'FORCE OFFLINE';
+
+                document.getElementById('activeModeText').innerText = `${data.mode} (${configStr})`;
+                updateModeButtons(data.sysMode);
+
+                // Nodes Monitor
+                document.getElementById('leftMac').innerText = data.leftNodeMac || "Not Connected";
+                document.getElementById('rightMac').innerText = data.rightNodeMac || "Not Connected";
+                
+                document.getElementById('leftDot').className = `node-dot ${data.leftNodeOnline ? 'online' : ''}`;
+                document.getElementById('rightDot').className = `node-dot ${data.rightNodeOnline ? 'online' : ''}`;
+
+                // Fetch System Logs / History from Firebase
+                const logRes = await fetch('/api/data?type=history');
+                const historyData = await logRes.json();
+                
+                const terminal = document.getElementById('terminalConsole');
+                let newLinesAdded = false;
+
+                // Sort history nodes by their timestamp
+                const sortedLogs = [];
+                Object.keys(historyData).forEach(key => {
+                    if (historyData[key] && historyData[key].timestamp) {
+                        sortedLogs.push(historyData[key]);
+                    }
+                });
+                
+                sortedLogs.sort((a, b) => a.timestamp - b.timestamp);
+
+                sortedLogs.forEach(entry => {
+                    const tstampStr = new Date(entry.timestamp).toLocaleTimeString();
+                    const uniqueKey = `${entry.timestamp}-${entry.occupiedSlots}-${entry.gateStatus}`;
+                    
+                    if (!localLoggedTimeStrings.has(uniqueKey)) {
+                        localLoggedTimeStrings.add(uniqueKey);
+                        
+                        const lineDiv = document.createElement('div');
+                        lineDiv.className = 'log-line';
+                        lineDiv.innerHTML = `
+                            <span class="log-tstamp">[${tstampStr}]</span>
+                            <span class="log-msg">Occupied: ${entry.occupiedSlots}/10 | Gate: ${entry.gateStatus} | Power: ${entry.powerUsage.toFixed(2)}W</span>
+                        `;
+                        terminal.appendChild(lineDiv);
+                        newLinesAdded = true;
+                    }
+                });
+
+                if (newLinesAdded) {
+                    terminal.scrollTop = terminal.scrollHeight;
+                }
+
+            } catch (err) {
+                console.error("Poll Admin error:", err);
+                document.getElementById('staleBanner').style.display = 'flex';
+                document.getElementById('staleTimeAgo').innerText = 'Database unreachable';
+            }
+        }
+
+        // Start Up
+        pollAdminData();
+        setInterval(pollAdminData, 5000);
+    </script>
+</body>
+</html>

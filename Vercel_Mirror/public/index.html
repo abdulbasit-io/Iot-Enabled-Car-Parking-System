@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking Dashboard (Cloud)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-grad: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent: #6366f1;
+            --emerald: #10b981;
+            --emerald-glow: rgba(16, 185, 129, 0.15);
+            --crimson: #ef4444;
+            --crimson-glow: rgba(239, 68, 68, 0.15);
+            --text-main: #f8fafc;
+            --text-mute: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-grad);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Stale Banner */
+        .stale-banner {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 15px 20px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.1);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(239, 68, 68, 0.3); }
+            50% { border-color: rgba(239, 68, 68, 0.6); }
+            100% { border-color: rgba(239, 68, 68, 0.3); }
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 span {
+            background: linear-gradient(to right, #818cf8, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .badge.cloud {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .badge.status {
+            transition: all 0.3s ease;
+        }
+
+        .badge.status.online {
+            background: var(--emerald-glow);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .badge.status.offline {
+            background: var(--crimson-glow);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Top Grid */
+        .top-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .top-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Frosted Cards */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-mute);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+        }
+
+        /* Occupancy Gauge Widget */
+        .occupancy-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            gap: 20px;
+            padding: 10px 0;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 12;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 439.8;
+            stroke-dashoffset: 439.8;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .gauge-label {
+            font-size: 0.75rem;
+            color: var(--text-mute);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .stat-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        .stat-color.occupied { background-color: var(--crimson); }
+        .stat-color.available { background-color: var(--emerald); }
+
+        .stat-val {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .stat-desc {
+            font-size: 0.8rem;
+            color: var(--text-mute);
+        }
+
+        /* Gate Status Widget */
+        .gate-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 15px;
+            min-height: 140px;
+        }
+
+        .gate-beacon {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.5rem;
+            transition: all 0.5s ease;
+        }
+
+        .gate-beacon.open {
+            border-color: var(--emerald);
+            box-shadow: 0 0 20px var(--emerald-glow);
+            animation: pulse-green 2s infinite;
+        }
+
+        .gate-beacon.closed {
+            border-color: var(--crimson);
+            box-shadow: 0 0 20px var(--crimson-glow);
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .gate-label-status {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+
+        .gate-label-status.open { color: var(--emerald); }
+        .gate-label-status.closed { color: var(--crimson); }
+
+        .full-warning {
+            color: var(--crimson);
+            background: rgba(239, 110, 110, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            animation: flash 1.5s infinite;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        /* Parking Layout Maps */
+        .layout-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .layout-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title span {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-mute);
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .slot-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 15px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .slot-card.occupied {
+            background: rgba(239, 68, 68, 0.04);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .slot-card.available {
+            background: rgba(16, 185, 129, 0.04);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .slot-id {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-mute);
+        }
+
+        .slot-icon {
+            font-size: 1.2rem;
+            filter: grayscale(1);
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .slot-card.occupied .slot-icon {
+            filter: none;
+            opacity: 1;
+        }
+
+        .slot-state {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .slot-card.occupied .slot-state { color: var(--crimson); }
+        .slot-card.available .slot-state { color: var(--emerald); }
+
+        /* Footer Link */
+        footer {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .admin-link {
+            color: var(--text-mute);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .admin-link:hover {
+            color: var(--text-main);
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Stale Warning Banner -->
+        <div id="staleBanner" class="stale-banner" style="display: none;">
+            <span>⚠️ Live Connection Stale: The physical central server appears to be offline.</span>
+            <span id="staleTimeAgo" style="font-size: 0.8rem; font-weight: normal; color: var(--text-mute);">Last active: --</span>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <h1>Smart <span>Parking</span></h1>
+            <div class="header-badges">
+                <div class="badge status online" id="statusBadge">Live</div>
+                <div class="badge cloud">Cloud Mirror</div>
+            </div>
+        </header>
+
+        <!-- Top Widgets Row -->
+        <div class="top-row">
+            <!-- Occupancy -->
+            <div class="card">
+                <div class="card-title">Real-Time Occupancy</div>
+                <div class="occupancy-body">
+                    <div class="gauge-container">
+                        <svg class="gauge-svg" width="140" height="140">
+                            <circle class="gauge-bg" cx="70" cy="70" r="60"></circle>
+                            <circle class="gauge-fill" id="occupancyRing" cx="70" cy="70" r="60"></circle>
+                        </svg>
+                        <div class="gauge-text">
+                            <div class="gauge-number" id="occCount">0</div>
+                            <div class="gauge-label">Occupied</div>
+                        </div>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-item">
+                            <div class="stat-color occupied"></div>
+                            <div>
+                                <div class="stat-val" id="lblOccupied">0</div>
+                                <div class="stat-desc">Full Slots</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-color available"></div>
+                            <div>
+                                <div class="stat-val" id="lblAvailable">10</div>
+                                <div class="stat-desc">Empty Slots</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gate Status -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-title">Gate Security</div>
+                <div class="gate-body">
+                    <div class="gate-beacon" id="gateBeacon">🔒</div>
+                    <div class="gate-label-status" id="gateStatusText">CLOSED</div>
+                    <div class="full-warning" id="fullWarning" style="display: none;">PARKING LOT FULL</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parking Maps Grid -->
+        <div class="layout-row">
+            <!-- Left Side -->
+            <div class="card">
+                <div class="section-title">
+                    <span>⬅️ Left Section</span>
+                    <span>L1 - L5</span>
+                </div>
+                <div class="slots-grid" id="leftGrid">
+                    <!-- Left slots auto generated -->
+                </div>
+            </div>
+
+            <!-- Right Side -->
+            <div class="card">
+                <div class="section-title">
+                    <span>➡️ Right Section</span>
+                    <span>R1 - R5</span>
+                </div>
+                <div class="slots-grid" id="rightGrid">
+                    <!-- Right slots auto generated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Navigation -->
+        <footer>
+            <a href="/admin.html" class="admin-link">🛡️ Admin Control Panel</a>
+        </footer>
+    </div>
+
+    <!-- Frontend Live Polling Logic -->
+    <script>
+        const maxSlots = 10;
+        const circumference = 2 * Math.PI * 60; // 376.99
+        const staleThresholdMs = 120000; // 2 minutes (120 seconds)
+
+        function updateGauge(occupied) {
+            const circle = document.getElementById('occupancyRing');
+            const percent = (occupied / maxSlots) * 100;
+            const offset = circumference - (percent / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            document.getElementById('occCount').innerText = occupied;
+            document.getElementById('lblOccupied').innerText = occupied;
+            document.getElementById('lblAvailable').innerText = maxSlots - occupied;
+        }
+
+        function buildGrids() {
+            // Generate Left Slots
+            let leftHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                leftHtml += `
+                    <div class="slot-card available" id="slot-L${i}">
+                        <div class="slot-id">L${i}</div>
+                        <div class="slot-icon">🚗</div>
+                        <div class="slot-state">Empty</div>
+                    </div>
+                `;
+            }
+            document.getElementById('leftGrid').innerHTML = leftHtml;
+
+            // Generate Right Slots
+            let rightHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                rightHtml += `
+                    <div class="slot-card available" id="slot-R${i}">
+                        <div class="slot-id">R${i}</div>
+                        <div class="slot-icon">🚗</div>
+                        <div class="slot-state">Empty</div>
+                    </div>
+                `;
+            }
+            document.getElementById('rightGrid').innerHTML = rightHtml;
+        }
+
+        async function pollData() {
+            try {
+                // Fetch stats from secure serverless proxy
+                const response = await fetch('/api/data');
+                const data = await response.json();
+
+                if (!data || Object.keys(data).length === 0) {
+                    throw new Error("Empty data returned");
+                }
+
+                // Connection stale check
+                const lastUpdatedTime = data.timestamp || 0;
+                const timeDiffMs = Date.now() - lastUpdatedTime;
+                
+                const banner = document.getElementById('staleBanner');
+                const badge = document.getElementById('statusBadge');
+                const timeAgoLabel = document.getElementById('staleTimeAgo');
+
+                if (timeDiffMs > staleThresholdMs) {
+                    // Stale connection / Device offline
+                    banner.style.display = 'flex';
+                    const minutesAgo = Math.floor(timeDiffMs / 60000);
+                    timeAgoLabel.innerText = `Last active: ${minutesAgo}m ago (${new Date(lastUpdatedTime).toLocaleTimeString()})`;
+                    
+                    badge.innerText = 'Stale';
+                    badge.className = 'badge status offline';
+                } else {
+                    // Live connection
+                    banner.style.display = 'none';
+                    badge.innerText = 'Live';
+                    badge.className = 'badge status online';
+                }
+
+                updateGauge(data.occupiedSlots);
+
+                // Gate updates
+                const beacon = document.getElementById('gateBeacon');
+                const text = document.getElementById('gateStatusText');
+                const warning = document.getElementById('fullWarning');
+
+                if (data.gateStatus === 'OPEN') {
+                    beacon.innerText = '🔓';
+                    beacon.className = 'gate-beacon open';
+                    text.innerText = 'OPEN';
+                    text.className = 'gate-label-status open';
+                } else {
+                    beacon.innerText = '🔒';
+                    beacon.className = 'gate-beacon closed';
+                    text.innerText = 'CLOSED';
+                    text.className = 'gate-label-status closed';
+                }
+
+                warning.style.display = (data.occupiedSlots >= maxSlots && data.gateStatus !== 'OPEN') ? 'block' : 'none';
+
+                // Map updates - Left
+                if (data.leftSlots && Array.isArray(data.leftSlots)) {
+                    data.leftSlots.forEach((val, index) => {
+                        const card = document.getElementById(`slot-L${index + 1}`);
+                        if (card) {
+                            card.className = `slot-card ${val ? 'occupied' : 'available'}`;
+                            card.querySelector('.slot-state').innerText = val ? 'Occupied' : 'Empty';
+                        }
+                    });
+                }
+
+                // Map updates - Right
+                if (data.rightSlots && Array.isArray(data.rightSlots)) {
+                    data.rightSlots.forEach((val, index) => {
+                        const card = document.getElementById(`slot-R${index + 1}`);
+                        if (card) {
+                            card.className = `slot-card ${val ? 'occupied' : 'available'}`;
+                            card.querySelector('.slot-state').innerText = val ? 'Occupied' : 'Empty';
+                        }
+                    });
+                }
+
+            } catch (err) {
+                console.error("Poll error:", err);
+                const badge = document.getElementById('statusBadge');
+                badge.innerText = 'Offline';
+                badge.className = 'badge status offline';
+                document.getElementById('staleBanner').style.display = 'flex';
+                document.getElementById('staleTimeAgo').innerText = 'Database unreachable';
+            }
+        }
+
+        // Start Up
+        buildGrids();
+        pollData();
+        setInterval(pollData, 5000); // Poll every 5s from Vercel
+    </script>
+</body>
+</html>
