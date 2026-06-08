@@ -129,7 +129,7 @@
         /* Top Grid */
         .top-row {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1.2fr 1fr 1fr;
             gap: 20px;
         }
 
@@ -532,6 +532,28 @@
                     <div class="full-warning" id="fullWarning" style="display: none;">PARKING LOT FULL</div>
                 </div>
             </div>
+
+            <!-- Forecast & Arrival Planner -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-title">Forecast & Arrival Planner</div>
+                <div class="forecast-body" style="padding: 10px 0; display: flex; flex-direction: column; gap: 12px; justify-content: center; height: 100%;">
+                    <!-- Next Peak Display -->
+                    <div class="forecast-peak-info" style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.15); padding: 8px 12px; border-radius: 12px; text-align: center;">
+                        <span style="font-size: 0.8rem; color: var(--text-mute); font-weight: 600; text-transform: uppercase;">Next Predicted Peak</span>
+                        <div id="lblNextPeak" style="font-size: 1.1rem; font-weight: 800; color: #f43f5e; margin-top: 2px;">Loading forecast...</div>
+                    </div>
+                    <!-- Arrival Time Picker -->
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label for="pickerArrival" style="font-size: 0.75rem; color: var(--text-mute); font-weight: 600; text-transform: uppercase;">Select Arrival Time:</label>
+                        <select id="pickerArrival" onchange="checkArrivalTime()" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-weight: 600; outline: none; cursor: pointer; width: 100%;">
+                            <option value="">-- Choose target time --</option>
+                        </select>
+                    </div>
+                    <!-- Result Alert -->
+                    <div id="divArrivalStatus" style="display: none; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-align: center; transition: all 0.3s ease;">
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Parking Maps Grid -->
@@ -663,6 +685,36 @@
 
                 warning.style.display = (data.occupiedSlots >= maxSlots && data.gateStatus !== 'OPEN') ? 'block' : 'none';
 
+                // Predictions Rendering
+                let cachedForecast = [];
+                if (data.predictions && data.predictions.forecast) {
+                    cachedForecast = data.predictions.forecast;
+                    window.cachedForecast = cachedForecast;
+                    
+                    if (data.predictions.nextPeakTime) {
+                        const peakTime = new Date(data.predictions.nextPeakTime);
+                        const peakHours = String(peakTime.getHours()).padStart(2, '0');
+                        const peakMins = String(peakTime.getMinutes()).padStart(2, '0');
+                        const peakOccupied = data.predictions.nextPeakOccupancy;
+                        document.getElementById('lblNextPeak').innerText = `${peakHours}:${peakMins} (${Math.round(peakOccupied)} slots)`;
+                    } else {
+                        document.getElementById('lblNextPeak').innerText = "Normal occupancy";
+                    }
+                    
+                    // Populate select options if empty
+                    const picker = document.getElementById('pickerArrival');
+                    if (picker && picker.options.length <= 1) {
+                        cachedForecast.forEach(f => {
+                            const opt = document.createElement('option');
+                            opt.value = f.time;
+                            opt.innerText = f.time;
+                            picker.appendChild(opt);
+                        });
+                    }
+                } else {
+                    document.getElementById('lblNextPeak').innerText = "Waiting for model...";
+                }
+
                 // Map updates - Left
                 if (data.leftSlots && Array.isArray(data.leftSlots)) {
                     data.leftSlots.forEach((val, index) => {
@@ -692,6 +744,54 @@
                 badge.className = 'badge status offline';
                 document.getElementById('staleBanner').style.display = 'flex';
                 document.getElementById('staleTimeAgo').innerText = 'Database unreachable';
+            }
+        }
+
+        function checkArrivalTime() {
+            const timeVal = document.getElementById('pickerArrival').value;
+            const statusDiv = document.getElementById('divArrivalStatus');
+            
+            if (!timeVal) {
+                statusDiv.style.display = 'none';
+                return;
+            }
+            
+            const forecast = window.cachedForecast || [];
+            const match = forecast.find(f => f.time === timeVal);
+            
+            if (match) {
+                statusDiv.style.display = 'block';
+                const slots = Math.round(match.occupancy);
+                const rate = match.occupancyRate;
+                
+                let text = "";
+                let bg = "";
+                let color = "";
+                let border = "";
+                
+                if (slots >= 8) {
+                    text = `🔴 Peak Demand: ${slots}/10 occupied (${rate}%). Congested.`;
+                    bg = "rgba(239, 68, 68, 0.15)";
+                    color = "#f87171";
+                    border = "1px solid rgba(239, 68, 68, 0.3)";
+                } else if (slots >= 4) {
+                    text = `🟡 Moderate Demand: ${slots}/10 occupied (${rate}%). Fair chance of space.`;
+                    bg = "rgba(234, 179, 8, 0.15)";
+                    color = "#fbbf24";
+                    border = "1px solid rgba(234, 179, 8, 0.3)";
+                } else {
+                    text = `🟢 Low Demand: ${slots}/10 occupied (${rate}%). Plenty of spaces.`;
+                    bg = "rgba(16, 185, 129, 0.15)";
+                    color = "#34d399";
+                    border = "1px solid rgba(16, 185, 129, 0.3)";
+                }
+                
+                statusDiv.style.backgroundColor = bg;
+                statusDiv.style.color = color;
+                statusDiv.style.border = border;
+                statusDiv.innerText = text;
+            } else {
+                statusDiv.style.display = 'none';
             }
         }
 

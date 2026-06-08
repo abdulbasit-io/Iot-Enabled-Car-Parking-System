@@ -630,6 +630,57 @@
             </div>
         </div>
 
+        <!-- Predictive Analytics row -->
+        <div class="grid-2" style="margin-top: 20px;">
+            <!-- Predictions Query & Peak Card -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-title">🔮 Peak Demand & Query Tool</div>
+                <div class="forecast-body" style="padding: 10px 0; display: flex; flex-direction: column; gap: 15px; justify-content: space-between; height: 100%;">
+                    <!-- Next Peak Display -->
+                    <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.15); padding: 10px 15px; border-radius: 12px;">
+                        <span style="font-size: 0.75rem; color: var(--text-mute); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Next Predicted Congestion Peak</span>
+                        <div id="lblNextPeakAdmin" style="font-size: 1.35rem; font-weight: 900; color: #f43f5e; margin-top: 4px;">Loading forecast...</div>
+                    </div>
+                    <!-- Query Input and Search -->
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label for="inputPredictTime" style="font-size: 0.75rem; color: var(--text-mute); font-weight: 600; text-transform: uppercase;">Query Future Availability:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="datetime-local" id="inputPredictTime" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-weight: 600; outline: none; flex-grow: 1; color-scheme: dark;">
+                            <button class="btn" onclick="queryCustomPrediction()" style="padding: 8px 15px;">Query</button>
+                        </div>
+                    </div>
+                    <!-- Search Result -->
+                    <div id="divAdminQueryStatus" style="display: none; padding: 10px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- 24-Hour Timeline Card -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-title">📈 24-Hour Occupancy Forecast</div>
+                <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 15px; padding: 10px 0;">
+                    <!-- Timeline Visual Grid -->
+                    <div class="timeline-visual" id="timelineVisual" style="display: grid; grid-template-columns: repeat(24, 1fr); gap: 4px; height: 80px; align-items: end;">
+                        <!-- 24 hourly bars generated dynamically -->
+                    </div>
+                    <!-- X-Axis Labels -->
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-mute); font-weight: 600; padding: 0 4px;">
+                        <span>12 AM</span>
+                        <span>4 AM</span>
+                        <span>8 AM</span>
+                        <span>12 PM</span>
+                        <span>4 PM</span>
+                        <span>8 PM</span>
+                        <span>11 PM</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-mute); text-align: center;">
+                        <span style="display: inline-block; width: 8px; height: 8px; background: #34d399; border-radius: 50%; margin-right: 4px;"></span> Low
+                        <span style="display: inline-block; width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; margin-left: 10px; margin-right: 4px;"></span> Moderate
+                        <span style="display: inline-block; width: 8px; height: 8px; background: #f87171; border-radius: 50%; margin-left: 10px; margin-right: 4px;"></span> Peak
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Telemetry and Logs row -->
         <div class="grid-2">
             <!-- Logs Console -->
@@ -752,6 +803,55 @@
                 document.getElementById('p-volt').innerText = '5.00 V'; 
                 document.getElementById('p-pow').innerText = data.powerUsage.toFixed(2) + ' W';
                 document.getElementById('p-energy').innerText = (data.powerUsage * 24 / 1000).toFixed(3) + ' kWh';
+
+                // Predictions Rendering
+                if (data.predictions && data.predictions.forecast) {
+                    const predictions = data.predictions;
+                    
+                    if (predictions.nextPeakTime) {
+                        const peakTime = new Date(predictions.nextPeakTime);
+                        const peakHours = String(peakTime.getHours()).padStart(2, '0');
+                        const peakMins = String(peakTime.getMinutes()).padStart(2, '0');
+                        const peakOccupied = predictions.nextPeakOccupancy;
+                        document.getElementById('lblNextPeakAdmin').innerText = `${peakHours}:${peakMins} (${Math.round(peakOccupied)}/10 slots occupied)`;
+                    } else {
+                        document.getElementById('lblNextPeakAdmin').innerText = "Normal occupancy expected";
+                    }
+                    
+                    // Render 24 hourly timeline bars
+                    const timelineVisual = document.getElementById('timelineVisual');
+                    if (timelineVisual) {
+                        timelineVisual.innerHTML = "";
+                        const hourlyForecasts = predictions.forecast.filter((_, idx) => idx % 4 === 0).slice(0, 24);
+                        
+                        hourlyForecasts.forEach(h => {
+                            const bar = document.createElement('div');
+                            const occupancy = h.occupancy;
+                            const pct = (occupancy / 10) * 100;
+                            const heightPx = Math.max(10, Math.round(pct * 0.8));
+                            
+                            bar.style.height = `${heightPx}px`;
+                            bar.style.borderRadius = "4px 4px 0 0";
+                            bar.style.transition = "all 0.3s ease";
+                            bar.title = `${h.time}: ${Math.round(occupancy)}/10 slots (${h.occupancyRate}%)`;
+                            
+                            if (occupancy >= 8.0) {
+                                bar.style.backgroundColor = "#f87171";
+                                bar.style.boxShadow = "0 0 8px rgba(248, 113, 113, 0.4)";
+                            } else if (occupancy >= 4.0) {
+                                bar.style.backgroundColor = "#fbbf24";
+                                bar.style.boxShadow = "0 0 8px rgba(251, 191, 36, 0.2)";
+                            } else {
+                                bar.style.backgroundColor = "#34d399";
+                                bar.style.boxShadow = "none";
+                            }
+                            
+                            timelineVisual.appendChild(bar);
+                        });
+                    }
+                } else {
+                    document.getElementById('lblNextPeakAdmin').innerText = "Waiting for model data...";
+                }
                 
                 // Get operating mode
                 let configStr = 'AUTO';
@@ -811,6 +911,70 @@
                 console.error("Poll Admin error:", err);
                 document.getElementById('staleBanner').style.display = 'flex';
                 document.getElementById('staleTimeAgo').innerText = 'Database unreachable';
+            }
+        }
+
+        async function queryCustomPrediction() {
+            const timeInput = document.getElementById('inputPredictTime').value;
+            const statusDiv = document.getElementById('divAdminQueryStatus');
+            
+            if (!timeInput) {
+                alert("Please select a target datetime.");
+                return;
+            }
+            
+            statusDiv.style.display = 'block';
+            statusDiv.style.backgroundColor = "rgba(255,255,255,0.05)";
+            statusDiv.style.color = "var(--text-mute)";
+            statusDiv.style.border = "1px solid rgba(255,255,255,0.1)";
+            statusDiv.innerText = "Querying ML Service...";
+            
+            try {
+                const isoStr = new Date(timeInput).toISOString();
+                const res = await fetch(`/api/data?predict=${encodeURIComponent(isoStr)}`);
+                const result = await res.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const slots = result.predicted_occupied_slots;
+                const rate = result.predicted_occupancy_rate;
+                const period = result.period_type;
+                const source = result.source || "Live Engine";
+                
+                let text = "";
+                let bg = "";
+                let color = "";
+                let border = "";
+                
+                if (slots >= 8) {
+                    text = `🔴 Peak Period (${period}): ${slots}/10 slots predicted (${rate}% occupied). Source: ${source}.`;
+                    bg = "rgba(239, 68, 68, 0.15)";
+                    color = "#f87171";
+                    border = "1px solid rgba(239, 68, 68, 0.3)";
+                } else if (slots >= 4) {
+                    text = `🟡 Moderate Period (${period}): ${slots}/10 slots predicted (${rate}% occupied). Source: ${source}.`;
+                    bg = "rgba(234, 179, 8, 0.15)";
+                    color = "#fbbf24";
+                    border = "1px solid rgba(234, 179, 8, 0.3)";
+                } else {
+                    text = `🟢 Low Period (${period}): ${slots}/10 slots predicted (${rate}% occupied). Source: ${source}.`;
+                    bg = "rgba(16, 185, 129, 0.15)";
+                    color = "#34d399";
+                    border = "1px solid rgba(16, 185, 129, 0.3)";
+                }
+                
+                statusDiv.style.backgroundColor = bg;
+                statusDiv.style.color = color;
+                statusDiv.style.border = border;
+                statusDiv.innerText = text;
+            } catch (err) {
+                console.error("Query prediction error:", err);
+                statusDiv.style.backgroundColor = "rgba(239, 68, 68, 0.15)";
+                statusDiv.style.color = "#f87171";
+                statusDiv.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+                statusDiv.innerText = `Error querying prediction: ${err.message}`;
             }
         }
 
