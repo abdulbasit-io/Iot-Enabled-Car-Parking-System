@@ -808,6 +808,13 @@ void closeGate() {
         buzzerGateClose();
         addLog("Gate closed");
         showLCDGateStatus();
+        
+        // Record event / trigger cloud sync immediately
+        if (!isOnlineMode) {
+            saveOfflineRecord("GATE_CLOSED");
+        } else {
+            pendingCloudSync = true;
+        }
     }
 }
 
