@@ -798,11 +798,12 @@
 
                 warning.style.display = (data.occupiedSlots >= 10 && data.gateStatus !== 'OPEN') ? 'block' : 'none';
 
-                // Set power telemetry
-                document.getElementById('p-curr').innerText = (data.powerUsage / 5.00).toFixed(2) + ' A';
+                // Set power telemetry safely
+                const pUsage = (data.powerUsage !== undefined && data.powerUsage !== null) ? Number(data.powerUsage) : 0.0;
+                document.getElementById('p-curr').innerText = (pUsage / 5.00).toFixed(2) + ' A';
                 document.getElementById('p-volt').innerText = '5.00 V'; 
-                document.getElementById('p-pow').innerText = data.powerUsage.toFixed(2) + ' W';
-                document.getElementById('p-energy').innerText = (data.powerUsage * 24 / 1000).toFixed(3) + ' kWh';
+                document.getElementById('p-pow').innerText = pUsage.toFixed(2) + ' W';
+                document.getElementById('p-energy').innerText = (pUsage * 24 / 1000).toFixed(3) + ' kWh';
 
                 // Predictions Rendering
                 if (data.predictions && data.predictions.forecast) {
@@ -894,9 +895,10 @@
                         
                         const lineDiv = document.createElement('div');
                         lineDiv.className = 'log-line';
+                        const entryPower = (entry.powerUsage !== undefined && entry.powerUsage !== null) ? Number(entry.powerUsage) : 0.0;
                         lineDiv.innerHTML = `
                             <span class="log-tstamp">[${tstampStr}]</span>
-                            <span class="log-msg">Occupied: ${entry.occupiedSlots}/10 | Gate: ${entry.gateStatus} | Power: ${entry.powerUsage.toFixed(2)}W</span>
+                            <span class="log-msg">Occupied: ${entry.occupiedSlots}/10 | Gate: ${entry.gateStatus} | Power: ${entryPower.toFixed(2)}W</span>
                         `;
                         terminal.appendChild(lineDiv);
                         newLinesAdded = true;
