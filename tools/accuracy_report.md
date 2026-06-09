@@ -1,33 +1,302 @@
 # Functional Accuracy Assessment Report
-**Generated on**: 2026-06-08 15:29:19  
+**Generated on**: 2026-06-09 12:05:47  
 **Academic Section Reference**: Section 3 - Functional Accuracy Assessment
 
 ## 1. Confusion Matrix
 | Metric | Value | Interpretation |
 |---|---|---|
-| **True Positives (TP)** | 3 | Correctly identified occupied slots |
-| **True Negatives (TN)** | 3 | Correctly identified vacant slots |
-| **False Positives (FP)** | 1 | Vacant slots incorrectly flagged as occupied |
+| **True Positives (TP)** | 78 | Correctly identified occupied slots |
+| **True Negatives (TN)** | 192 | Correctly identified vacant slots |
+| **False Positives (FP)** | 6 | Vacant slots incorrectly flagged as occupied |
 | **False Negatives (FN)** | 0 | Occupied slots incorrectly flagged as vacant |
 
 ## 2. Mechatronics Performance Metrics
-Calculated from 7 experimental trials:
+Calculated from 276 experimental trials:
 
-* **Accuracy**: `85.71%` (Target: > 97.00%) - status: **⚠️ MARGINAL**
-* **Precision**: `75.00%` (Target: > 95.00%) - status: **⚠️ MARGINAL**
+* **Accuracy**: `97.83%` (Target: > 97.00%) - status: **✅ PASSED**
+* **Precision**: `92.86%` (Target: > 95.00%) - status: **⚠️ MARGINAL**
 * **Recall (Sensitivity)**: `100.00%` (Target: > 95.00%) - status: **✅ PASSED**
-* **F1-Score**: `0.8571` (Target: > 0.9500) - status: **⚠️ MARGINAL**
+* **F1-Score**: `0.9630` (Target: > 0.9500) - status: **✅ PASSED**
 
 ## 3. Trial-by-Trial Log
 | Trial # | Slot | Ground Truth | System Detection | Result |
 |---|---|---|---|---|
-| 1 | L4 | Vacant | Occupied | FP |
-| 2 | L1 | Vacant | Vacant | TN |
-| 3 | R1 | Occupied | Occupied | TP |
-| 4 | R2 | Occupied | Occupied | TP |
-| 5 | R3 | Vacant | Vacant | TN |
-| 6 | L4 | Occupied | Occupied | TP |
-| 7 | L5 | Vacant | Vacant | TN |
+| 1 | L5 | Occupied | Occupied | TP |
+| 2 | L5 | Occupied | Occupied | TP |
+| 3 | L4 | Occupied | Occupied | TP |
+| 4 | L4 | Occupied | Occupied | TP |
+| 5 | L3 | Occupied | Occupied | TP |
+| 6 | L3 | Occupied | Occupied | TP |
+| 7 | L2 | Occupied | Occupied | TP |
+| 8 | L2 | Occupied | Occupied | TP |
+| 9 | L2 | Occupied | Occupied | TP |
+| 10 | L1 | Occupied | Occupied | TP |
+| 11 | L1 | Occupied | Occupied | TP |
+| 12 | L1 | Occupied | Occupied | TP |
+| 13 | L1 | Occupied | Occupied | TP |
+| 14 | L1 | Occupied | Occupied | TP |
+| 15 | L2 | Occupied | Occupied | TP |
+| 16 | L2 | Occupied | Occupied | TP |
+| 17 | L2 | Occupied | Occupied | TP |
+| 18 | L2 | Occupied | Occupied | TP |
+| 19 | L3 | Occupied | Occupied | TP |
+| 20 | L3 | Occupied | Occupied | TP |
+| 21 | L3 | Occupied | Occupied | TP |
+| 22 | L3 | Occupied | Occupied | TP |
+| 23 | L4 | Occupied | Occupied | TP |
+| 24 | L4 | Occupied | Occupied | TP |
+| 25 | L4 | Occupied | Occupied | TP |
+| 26 | L5 | Occupied | Occupied | TP |
+| 27 | L5 | Occupied | Occupied | TP |
+| 28 | L5 | Occupied | Occupied | TP |
+| 29 | L5 | Occupied | Occupied | TP |
+| 30 | R1 | Occupied | Occupied | TP |
+| 31 | R1 | Occupied | Occupied | TP |
+| 32 | R1 | Occupied | Occupied | TP |
+| 33 | R1 | Occupied | Occupied | TP |
+| 34 | R1 | Occupied | Occupied | TP |
+| 35 | R1 | Occupied | Occupied | TP |
+| 36 | R1 | Occupied | Occupied | TP |
+| 37 | R1 | Occupied | Occupied | TP |
+| 38 | R2 | Occupied | Occupied | TP |
+| 39 | R2 | Occupied | Occupied | TP |
+| 40 | R2 | Occupied | Occupied | TP |
+| 41 | R2 | Occupied | Occupied | TP |
+| 42 | R2 | Occupied | Occupied | TP |
+| 43 | R2 | Occupied | Occupied | TP |
+| 44 | R2 | Occupied | Occupied | TP |
+| 45 | R3 | Occupied | Occupied | TP |
+| 46 | R3 | Occupied | Occupied | TP |
+| 47 | R3 | Occupied | Occupied | TP |
+| 48 | R3 | Occupied | Occupied | TP |
+| 49 | R3 | Occupied | Occupied | TP |
+| 50 | R3 | Occupied | Occupied | TP |
+| 51 | R4 | Occupied | Occupied | TP |
+| 52 | R4 | Occupied | Occupied | TP |
+| 53 | R3 | Occupied | Occupied | TP |
+| 54 | R3 | Occupied | Occupied | TP |
+| 55 | R3 | Occupied | Occupied | TP |
+| 56 | R3 | Occupied | Occupied | TP |
+| 57 | R3 | Occupied | Occupied | TP |
+| 58 | R3 | Occupied | Occupied | TP |
+| 59 | R3 | Occupied | Occupied | TP |
+| 60 | R4 | Occupied | Occupied | TP |
+| 61 | R4 | Occupied | Occupied | TP |
+| 62 | R4 | Occupied | Occupied | TP |
+| 63 | R4 | Occupied | Occupied | TP |
+| 64 | R4 | Occupied | Occupied | TP |
+| 65 | R4 | Occupied | Occupied | TP |
+| 66 | R4 | Occupied | Occupied | TP |
+| 67 | R4 | Occupied | Occupied | TP |
+| 68 | R4 | Occupied | Occupied | TP |
+| 69 | R4 | Occupied | Occupied | TP |
+| 70 | R5 | Occupied | Occupied | TP |
+| 71 | R5 | Occupied | Occupied | TP |
+| 72 | R5 | Occupied | Occupied | TP |
+| 73 | R5 | Occupied | Occupied | TP |
+| 74 | R5 | Occupied | Occupied | TP |
+| 75 | R5 | Occupied | Occupied | TP |
+| 76 | R5 | Occupied | Occupied | TP |
+| 77 | R5 | Occupied | Occupied | TP |
+| 78 | L5 | Vacant | Vacant | TN |
+| 79 | L5 | Vacant | Vacant | TN |
+| 80 | L5 | Vacant | Vacant | TN |
+| 81 | L5 | Vacant | Vacant | TN |
+| 82 | L5 | Vacant | Vacant | TN |
+| 83 | L5 | Vacant | Vacant | TN |
+| 84 | L5 | Vacant | Vacant | TN |
+| 85 | L4 | Vacant | Vacant | TN |
+| 86 | L4 | Vacant | Vacant | TN |
+| 87 | L4 | Vacant | Vacant | TN |
+| 88 | L4 | Vacant | Vacant | TN |
+| 89 | L4 | Vacant | Vacant | TN |
+| 90 | L4 | Vacant | Vacant | TN |
+| 91 | L4 | Vacant | Vacant | TN |
+| 92 | L4 | Vacant | Vacant | TN |
+| 93 | L4 | Vacant | Vacant | TN |
+| 94 | L4 | Vacant | Vacant | TN |
+| 95 | L4 | Vacant | Vacant | TN |
+| 96 | L4 | Vacant | Vacant | TN |
+| 97 | L4 | Vacant | Vacant | TN |
+| 98 | L4 | Vacant | Vacant | TN |
+| 99 | L4 | Vacant | Vacant | TN |
+| 100 | L4 | Vacant | Vacant | TN |
+| 101 | L4 | Vacant | Occupied | FP |
+| 102 | L3 | Vacant | Vacant | TN |
+| 103 | L3 | Vacant | Vacant | TN |
+| 104 | L3 | Vacant | Vacant | TN |
+| 105 | L3 | Vacant | Vacant | TN |
+| 106 | L3 | Vacant | Vacant | TN |
+| 107 | L3 | Vacant | Vacant | TN |
+| 108 | L3 | Vacant | Vacant | TN |
+| 109 | L3 | Vacant | Vacant | TN |
+| 110 | L3 | Vacant | Vacant | TN |
+| 111 | L3 | Vacant | Vacant | TN |
+| 112 | L3 | Vacant | Vacant | TN |
+| 113 | L3 | Vacant | Vacant | TN |
+| 114 | L3 | Vacant | Vacant | TN |
+| 115 | L3 | Vacant | Vacant | TN |
+| 116 | L3 | Vacant | Vacant | TN |
+| 117 | L3 | Vacant | Vacant | TN |
+| 118 | L3 | Vacant | Vacant | TN |
+| 119 | L3 | Vacant | Vacant | TN |
+| 120 | L3 | Vacant | Vacant | TN |
+| 121 | L3 | Vacant | Vacant | TN |
+| 122 | L3 | Vacant | Vacant | TN |
+| 123 | L2 | Vacant | Vacant | TN |
+| 124 | L2 | Vacant | Vacant | TN |
+| 125 | L2 | Vacant | Vacant | TN |
+| 126 | L2 | Vacant | Vacant | TN |
+| 127 | L2 | Vacant | Vacant | TN |
+| 128 | L2 | Vacant | Vacant | TN |
+| 129 | L2 | Vacant | Vacant | TN |
+| 130 | L2 | Vacant | Vacant | TN |
+| 131 | L2 | Vacant | Vacant | TN |
+| 132 | L2 | Vacant | Vacant | TN |
+| 133 | L2 | Vacant | Vacant | TN |
+| 134 | L2 | Vacant | Vacant | TN |
+| 135 | L2 | Vacant | Vacant | TN |
+| 136 | L2 | Vacant | Vacant | TN |
+| 137 | L1 | Vacant | Vacant | TN |
+| 138 | L1 | Vacant | Vacant | TN |
+| 139 | L1 | Vacant | Vacant | TN |
+| 140 | L1 | Vacant | Vacant | TN |
+| 141 | L1 | Vacant | Vacant | TN |
+| 142 | L1 | Vacant | Vacant | TN |
+| 143 | L1 | Vacant | Vacant | TN |
+| 144 | L1 | Vacant | Vacant | TN |
+| 145 | L1 | Vacant | Vacant | TN |
+| 146 | L1 | Vacant | Vacant | TN |
+| 147 | L1 | Vacant | Vacant | TN |
+| 148 | L1 | Vacant | Vacant | TN |
+| 149 | L1 | Vacant | Vacant | TN |
+| 150 | L1 | Vacant | Vacant | TN |
+| 151 | L1 | Vacant | Vacant | TN |
+| 152 | L1 | Vacant | Vacant | TN |
+| 153 | L1 | Vacant | Vacant | TN |
+| 154 | L1 | Vacant | Vacant | TN |
+| 155 | L1 | Vacant | Vacant | TN |
+| 156 | R5 | Vacant | Vacant | TN |
+| 157 | R5 | Vacant | Vacant | TN |
+| 158 | R5 | Vacant | Vacant | TN |
+| 159 | R5 | Vacant | Vacant | TN |
+| 160 | R5 | Vacant | Vacant | TN |
+| 161 | R5 | Vacant | Vacant | TN |
+| 162 | R5 | Vacant | Vacant | TN |
+| 163 | R5 | Vacant | Vacant | TN |
+| 164 | R5 | Vacant | Vacant | TN |
+| 165 | R5 | Vacant | Vacant | TN |
+| 166 | R5 | Vacant | Vacant | TN |
+| 167 | R5 | Vacant | Vacant | TN |
+| 168 | R5 | Vacant | Vacant | TN |
+| 169 | R5 | Vacant | Vacant | TN |
+| 170 | R5 | Vacant | Vacant | TN |
+| 171 | R5 | Vacant | Vacant | TN |
+| 172 | R4 | Vacant | Vacant | TN |
+| 173 | R4 | Vacant | Vacant | TN |
+| 174 | R4 | Vacant | Vacant | TN |
+| 175 | R4 | Vacant | Vacant | TN |
+| 176 | R4 | Vacant | Vacant | TN |
+| 177 | R4 | Vacant | Vacant | TN |
+| 178 | R4 | Vacant | Vacant | TN |
+| 179 | R4 | Vacant | Vacant | TN |
+| 180 | R4 | Vacant | Vacant | TN |
+| 181 | R4 | Vacant | Vacant | TN |
+| 182 | R4 | Vacant | Vacant | TN |
+| 183 | R4 | Vacant | Vacant | TN |
+| 184 | R4 | Vacant | Vacant | TN |
+| 185 | R4 | Vacant | Vacant | TN |
+| 186 | R4 | Vacant | Vacant | TN |
+| 187 | R4 | Vacant | Vacant | TN |
+| 188 | R4 | Vacant | Vacant | TN |
+| 189 | R3 | Vacant | Vacant | TN |
+| 190 | R3 | Vacant | Vacant | TN |
+| 191 | R3 | Vacant | Vacant | TN |
+| 192 | R3 | Vacant | Vacant | TN |
+| 193 | R3 | Vacant | Vacant | TN |
+| 194 | R3 | Vacant | Vacant | TN |
+| 195 | R3 | Vacant | Vacant | TN |
+| 196 | R3 | Vacant | Vacant | TN |
+| 197 | R3 | Vacant | Vacant | TN |
+| 198 | R3 | Vacant | Vacant | TN |
+| 199 | R3 | Vacant | Vacant | TN |
+| 200 | R3 | Vacant | Vacant | TN |
+| 201 | R3 | Vacant | Vacant | TN |
+| 202 | R3 | Vacant | Vacant | TN |
+| 203 | R3 | Vacant | Vacant | TN |
+| 204 | R3 | Vacant | Vacant | TN |
+| 205 | R3 | Vacant | Vacant | TN |
+| 206 | R3 | Vacant | Vacant | TN |
+| 207 | R3 | Vacant | Vacant | TN |
+| 208 | R3 | Vacant | Vacant | TN |
+| 209 | R3 | Vacant | Vacant | TN |
+| 210 | R3 | Vacant | Vacant | TN |
+| 211 | R3 | Vacant | Vacant | TN |
+| 212 | R3 | Vacant | Vacant | TN |
+| 213 | R3 | Vacant | Vacant | TN |
+| 214 | R3 | Vacant | Vacant | TN |
+| 215 | R3 | Vacant | Vacant | TN |
+| 216 | R3 | Vacant | Vacant | TN |
+| 217 | R3 | Vacant | Vacant | TN |
+| 218 | R3 | Vacant | Vacant | TN |
+| 219 | R2 | Vacant | Vacant | TN |
+| 220 | R2 | Vacant | Vacant | TN |
+| 221 | R2 | Vacant | Vacant | TN |
+| 222 | R2 | Vacant | Vacant | TN |
+| 223 | R2 | Vacant | Vacant | TN |
+| 224 | R2 | Vacant | Vacant | TN |
+| 225 | R2 | Vacant | Vacant | TN |
+| 226 | R2 | Vacant | Vacant | TN |
+| 227 | R2 | Vacant | Vacant | TN |
+| 228 | R2 | Vacant | Vacant | TN |
+| 229 | R2 | Vacant | Vacant | TN |
+| 230 | R2 | Vacant | Vacant | TN |
+| 231 | R2 | Vacant | Vacant | TN |
+| 232 | R2 | Vacant | Vacant | TN |
+| 233 | R2 | Vacant | Vacant | TN |
+| 234 | R2 | Vacant | Vacant | TN |
+| 235 | R2 | Vacant | Vacant | TN |
+| 236 | R2 | Vacant | Vacant | TN |
+| 237 | R2 | Vacant | Vacant | TN |
+| 238 | R2 | Vacant | Vacant | TN |
+| 239 | R2 | Vacant | Vacant | TN |
+| 240 | R2 | Vacant | Vacant | TN |
+| 241 | R2 | Vacant | Vacant | TN |
+| 242 | R2 | Vacant | Vacant | TN |
+| 243 | R2 | Vacant | Vacant | TN |
+| 244 | R2 | Vacant | Vacant | TN |
+| 245 | R1 | Vacant | Vacant | TN |
+| 246 | R1 | Vacant | Vacant | TN |
+| 247 | R1 | Vacant | Vacant | TN |
+| 248 | R1 | Vacant | Vacant | TN |
+| 249 | R1 | Vacant | Vacant | TN |
+| 250 | R1 | Vacant | Vacant | TN |
+| 251 | R1 | Vacant | Vacant | TN |
+| 252 | R1 | Vacant | Vacant | TN |
+| 253 | R1 | Vacant | Vacant | TN |
+| 254 | R1 | Vacant | Vacant | TN |
+| 255 | R1 | Vacant | Vacant | TN |
+| 256 | R1 | Vacant | Vacant | TN |
+| 257 | R1 | Vacant | Vacant | TN |
+| 258 | R1 | Vacant | Vacant | TN |
+| 259 | R1 | Vacant | Vacant | TN |
+| 260 | R1 | Vacant | Vacant | TN |
+| 261 | R1 | Vacant | Vacant | TN |
+| 262 | R1 | Vacant | Vacant | TN |
+| 263 | R1 | Vacant | Vacant | TN |
+| 264 | R1 | Vacant | Vacant | TN |
+| 265 | R1 | Vacant | Vacant | TN |
+| 266 | R1 | Vacant | Vacant | TN |
+| 267 | R1 | Vacant | Vacant | TN |
+| 268 | R1 | Vacant | Vacant | TN |
+| 269 | R5 | Vacant | Occupied | FP |
+| 270 | R5 | Vacant | Vacant | TN |
+| 271 | R5 | Vacant | Occupied | FP |
+| 272 | R5 | Occupied | Occupied | TP |
+| 273 | R5 | Vacant | Occupied | FP |
+| 274 | R5 | Vacant | Occupied | FP |
+| 275 | R5 | Vacant | Occupied | FP |
+| 276 | R5 | Vacant | Vacant | TN |
 
 ---
 *Document prepared for submission to academic journals (Mechatronics Engineering Department, FUNAAB).*
