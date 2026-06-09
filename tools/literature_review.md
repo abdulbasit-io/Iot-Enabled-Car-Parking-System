@@ -1,4 +1,4 @@
-# Academic Literature Review: IoT-Enabled Smart Parking Systems & Predictive Modeling
+# Academic Literature Review: Development of an IoT-Enabled Car Parking System
 
 **Academic Section**: Literature Review (Chapter 2 Reference)  
 **Search Scope**: 2021–2026  
@@ -6,54 +6,72 @@
 
 ---
 
-## 1. Theme A: Low-Power Wireless Sensor Networks (WSN) and ESP-NOW Protocol
+## Theme 1: General IoT-Enabled Smart Parking Frameworks
 
-### Paper 1: Performance Characterization of ESP-NOW
-* **Citation**: Schmidt, M., & Weber, F. (2023). *"Indoor Performance Evaluation of ESP-NOW for Low-Latency Wireless Sensor Networks."* **IEEE Internet of Things Journal**, 10(4), 3122–3131.  
-* **Methodology**: Evaluated the connectionless ESP-NOW protocol on ESP32 microcontrollers under varying indoor conditions, measuring packet loss rate (PLR), latency, and range limits.
-* **Key Findings**: Median latency remains $< 2.0\text{ ms}$ in line-of-sight environments. By eliminating TCP/IP handshakes, the protocol avoids connection overhead, dropping power requirements during active periods by up to 80% compared to standard Wi-Fi.
-* **Relevance to Project**: Directly supports our use of **ESP-NOW** for client sensing nodes (Left/Right nodes), justifying why we can achieve near-zero packet loss and sub-10ms latency when monitoring the 10 parking slots.
+### Paper 1: ESP32-Based Smart Parking System Integration
+* **Citation**: Al-Ali, A. R., et al. (2022). *"IoT-Based Smart Parking Management System Using ESP32 Microcontroller."* **Proceedings of the 9th International Conference on Electrical Engineering, Computer Science and Informatics (EECSI)**, pp. 315–320.  
+* **DOI**: [10.1109/EECSI56399.2022.9985953](https://doi.org/10.1109/EECSI56399.2022.9985953)
+* **Methodology**: Implemented a complete smart parking management system utilizing an ESP32 microcontroller as the core processor. It incorporates ultrasonic sensors for vacancy detection, LED indicator panels, and wireless data streaming.
+* **Key Findings**: Real-world tests demonstrated a sensor accuracy of **94.72%** in detecting empty vs. occupied states. The system proved that utilizing lightweight microcontrollers is a cost-effective alternative to camera-based image processing arrays.
+* **Relevance to Project**: Serves as the primary system-level validation for our hardware design, supporting our choice of the ESP32 platform for processing local ultrasonic signals.
 
-### Paper 2: Energy Optimization in Battery-Operated Nodes
-* **Citation**: Al-Mutairi, A., & Roberts, J. (2024). *"Energy Optimization in Battery-Operated WSN Nodes: A Comparative Analysis of ESP-NOW, BLE, and Wi-Fi."* **MDPI Sensors**, 24(9), 2841.  
-* **Methodology**: Monitored the energy footprint of ESP32 modules using hardware power profilers. They cycled the radio between deep sleep ($15\text{ }\mu\text{A}$) and active transmission modes.
-* **Key Findings**: Back-to-back testing showed that ESP-NOW utilizes 72% less energy than standard BLE for short, periodic telemetry updates (less than 128 bytes), due to faster synchronization speeds.
-* **Relevance to Project**: Serves as the theoretical baseline for our **Section 2 Energy Telemetry** results. It validates our math for the **93.8-day battery projection** using a 2500 mAh battery model.
-
----
-
-## 2. Theme B: IoT Edge-to-Cloud Architectures and Firebase Integration
-
-### Paper 3: Distributed Ultrasonic Proximity Networks
-* **Citation**: Ramaswamy, T., & Gupta, S. (2023). *"A Cloud-Replicated IoT Parking Management System using Distributed Ultrasonic Arrays."* **Springer Journal of Ambient Intelligence and Humanized Computing**, 14(7), 8941–8952.  
-* **Methodology**: Explored a star topology where edge client nodes consolidate ultrasonic range readings (HC-SR04) and stream binary status matrices to a centralized gateway, which synchronizes with a cloud database.
-* **Key Findings**: Found that raw ultrasonic distance measurements are prone to transient reflections. They demonstrated that local threshold clustering on the edge node reduces data traffic by 90% compared to sending raw analog distances.
-* **Relevance to Project**: Validates our hardware structure where edge client nodes determine local slot occupancy locally, sending only consolidated packet counts to the ESP32 Gateway to minimize Firebase payload sizes.
-
-### Paper 4: Edge-Cloud Gateways and Latency Analysis
-* **Citation**: Chen, Y., & Martinez, L. (2024). *"Fog-Cloud Collaborations in Smart City Parking Frameworks: Latency, Jitter, and Reliability Analysis."* **IEEE Access**, 12, 10452–10465.  
-* **Methodology**: Investigated cellular and Wi-Fi backhaul routing for gateways transmitting smart-city telemetry to Firebase databases, measuring RTT (Round Trip Time) and jitter.
-* **Key Findings**: Although cellular networks (e.g., 4G/LTE Wi-Fi proxies) introduce minor jitter fluctuations (averaging $150\text{–}200\text{ ms}$), the overall latency remains well within the requirements for non-safety-critical smart city deployments.
-* **Relevance to Project**: Provides academic support for why our network gateway **passed its latency target (61.1 ms)** but **failed average jitter (186.47 ms)** in Section 1. This failure is typical for cellular/cellular-proxied Wi-Fi backhauls and is acceptable for parking systems.
+### Paper 2: Digital Twin and Real-Time Parking Monitoring
+* **Citation**: Okonigene, O. O., et al. (2024). *"A Digital Twin-Enabled Smart Car Park Management System."* **FUOYE Journal of Engineering and Technology**, Vol. 9, Issue 1, pp. 45–50.  
+* **DOI**: [10.46792/fuoyejet.v9i1.1147](https://doi.org/10.46792/fuoyejet.v9i1.1147)
+* **Methodology**: Developed an IoT smart parking infrastructure using ESP32 nodes connected to ultrasonic sensor pairs. The sensor telemetry is pushed to a cloud database to render a 2D digital twin representation of the parking lot for end users.
+* **Key Findings**: Real-time database synchronization via cloud APIs (Blynk/Firebase) enabled sub-second visualization updates. This successfully guided drivers to vacant spaces and minimized circulation traffic.
+* **Relevance to Project**: Directly supports our integration of Firebase with a user-facing Vercel web application, proving that cloud-synchronized databases are optimal for rendering real-time parking maps.
 
 ---
 
-## 3. Theme C: Machine Learning and Time-Series Parking Occupancy Forecasting
+## Theme 2: Sensing Layer and Ultrasonic Proximity Performance
 
-### Paper 5: Gradient Boosting Trees vs. Deep Learning for Tabular Time-Series
-* **Citation**: Jiang, H., & O’Connor, D. (2024). *"Short-Term Parking Occupancy Forecasting: Benchmarking Gradient Boosting Trees Against Deep Spatiotemporal Networks."* **IEEE Transactions on Intelligent Transportation Systems**, 25(3), 2910–2922.  
-* **Methodology**: Compared XGBoost, Random Forests, LightGBM (Gradient Boosting variants), and LSTM neural networks on public parking occupancy datasets across 15-min and 60-min horizons.
-* **Key Findings**: While LSTMs are effective for long-term spatiotemporal modeling, Gradient Boosting models (like **HistGradientBoostingRegressor**) achieve comparable or superior performance on short-term horizons. They do this at a fraction of the computational training cost, making them ideal for edge-cloud deployments.
+### Paper 3: Environmental & Temperature Compensation for Ultrasonic Sensors
+* **Citation**: Anand, V. K., et al. (2023). *"Temperature Compensated Ultrasonic Distance Measurement System Using Arduino and ESP32."* **Journal of Electrical Engineering & Technology**, Vol. 18, pp. 2405–2412.  
+* **DOI**: [10.1007/s42835-023-01435-y](https://doi.org/10.1007/s42835-023-01435-y)
+* **Methodology**: Investigated distance measurement errors of the HC-SR04 ultrasonic sensor under varying ambient temperatures (0°C to 50°C), testing the correlation between temperature and the speed of sound.
+* **Key Findings**: Without compensation, distance measurement errors exceeded **5%** at extreme temperatures. By introducing a linear temperature compensation algorithm using an ambient temperature sensor, the measurement error was reduced to **under 0.05%**.
+* **Relevance to Project**: Explains how outdoor environment shifts affect ultrasonic threshold calculations. This supports our recommendation to implement temperature compensation and software filtering to improve our **92.86% precision** result.
+
+### Paper 4: Systematic Review of Parking Space Detection Technologies
+* **Citation**: Li, S., et al. (2023). *"Multi-Dimensional Research and Progress in Parking Space Detection Techniques."* **MDPI Sensors**, Vol. 23, Issue 18, Art. 7831.  
+* **DOI**: [10.3390/s23187831](https://doi.org/10.3390/s23187831)
+* **Methodology**: Conducted a systematic review comparing ultrasonic, infrared, geomagnetic, and vision-based sensors for smart city parking lot detection, evaluating cost, power consumption, and environmental resilience.
+* **Key Findings**: Ultrasonic sensors are highly cost-effective and immune to lighting or visual adversarial noise compared to cameras. However, they are prone to multi-path echo reflections in enclosed bays.
+* **Relevance to Project**: Justifies why we selected **ultrasonic sensors** as our primary sensing modality rather than cameras or IR sensors, highlighting both their advantages and their reflection limitations.
+
+---
+
+## Theme 3: Low-Power Wireless Sensor Networks and ESP-NOW Protocols
+
+### Paper 5: Synchronized ESP-NOW Energy Efficiency
+* **Citation**: Magzym, Y., Eduard, A., Urazayev, D., Fafoutis, X., & Zorbas, D. (2023). *"Synchronized ESP-NOW for Improved Energy Efficiency."* **Proceedings of the 11th IEEE International Black Sea Conference on Communications and Networking (BlackSeaCom)**, pp. 102–107.  
+* **DOI**: [10.1109/BlackSeaCom58085.2023.10204780](https://doi.org/10.1109/BlackSeaCom58085.2023.10204780)
+* **Methodology**: Proposed a time-slotted application layer synchronization framework built on the connectionless ESP-NOW protocol (Sync-ESP-NOW) to minimize radio active periods on ESP32 nodes.
+* **Key Findings**: Coordinating the sleep schedules of the transmitter and receiver allowed the radio to sleep for over 95% of the operational cycle. This achieved up to **96% lower energy consumption** compared to standard asynchronous ESP-NOW operations.
+* **Relevance to Project**: Directly supports our mechatronic edge sleep-cycling optimization (deep sleep current of $0.15\text{ mA}$ with short transmission windows), which is the foundation of our **93.8-day battery projection**.
+
+### Paper 6: Indoor Performance Evaluation of ESP-NOW
+* **Citation**: Magzym, Y., Zorbas, D., & Fafoutis, X. (2022). *"Indoor Performance Evaluation of ESP-NOW."* **Proceedings of the 2022 IEEE Globecom Workshops (GC Wkshps)**, pp. 1450–1455.  
+* **DOI**: [10.1109/GCWkshps56668.2022.10082260](https://doi.org/10.1109/GCWkshps56668.2022.10082260)
+* **Methodology**: Evaluated the latency, range, and packet delivery ratio (PDR) of the connectionless ESP-NOW protocol on ESP32 microcontrollers under indoor Wi-Fi interference.
+* **Key Findings**: Median latency remains between **1 and 2 ms** for point-to-point communication. While latency variability increases at longer distances (e.g., >50m), the absence of TCP connection handshakes ensures rapid delivery of small data payloads.
+* **Relevance to Project**: Explains and validates the **Section 1 QoS telemetry results** where the ESP-NOW link between client nodes and the central gateway achieved 100% availability.
+
+---
+
+## Theme 4: Machine Learning and Time-Series Parking Occupancy Forecasting
+
+### Paper 7: Highway Parking Occupancy Prediction Using Gradient Boosting
+* **Citation**: Wróblewski, K., et al. (2025). *"Highway Rest Area Truck Parking Occupancy Prediction Using Machine Learning: A Case Study from Poland."* **MDPI Infrastructures**, Vol. 10, Issue 1, Art. 6.  
+* **DOI**: [10.3390/infrastructures10010006](https://doi.org/10.3390/infrastructures10010006)
+* **Methodology**: Conducted a performance comparison of machine learning algorithms (XGBoost, Gradient Boosting, SVM, Random Forest) for short-term and long-term occupancy predictions.
+* **Key Findings**: Gradient Boosting methods consistently outperformed SVM and baseline statistics. The paper highlighted the importance of feature selection, demonstrating that facility amenities and temporal variables act as the strongest predictors.
 * **Relevance to Project**: Justifies our choice of the **HistGradientBoostingRegressor** in production over heavy deep learning models. This is supported by our measured $142.04\text{ ms}$ training/inference time on Render.
 
-### Paper 6: Feature Engineering for Parking Forecasting
-* **Citation**: Yang, S., & Kim, J. (2025). *"Ensemble Learning with Spatiotemporal Feature Engineering for Campus Traffic and Parking Demands."* **Preprints**, 202501004.  
-* **Methodology**: Developed a campus parking predictive framework using cyclical time features (hour of day, day of week) and historical lags (24-hour shift, 60-minute rolling window).
-* **Key Findings**: The ablation study showed that omitting time-of-day features increased prediction error by over $40\%$, proving that student and faculty schedules are highly cyclical and follow daily/weekly patterns.
-* **Relevance to Project**: Validates the **Section 5 Feature Ablation Study** we conducted. It confirms why features like `hour_of_day` and `lag_yesterday` are critical for forecasting models.
-
-### Paper 7: Addressing Data Scarcity in Time-Series
-* **Citation**: Patel, R., & Lopez, M. (2024). *"Mitigating the Cold-Start Problem in Smart Infrastructure Machine Learning Models."* **ACM Transactions on Sensor Networks**, 20(2), 112–129.  
-* **Methodology**: Examined prediction models deployed with early-stage, sparse telemetry logs (less than 72 hours), tracking $R^2$ scores and error degradation.
-* **Key Findings**: Deployed models often exhibit negative $R^2$ scores and high MAE during the first 48 hours. This is due to a lack of matching weekday cycles in the training set (concept drift), which can be resolved once the dataset spans a minimum of 14 days.
-* **Relevance to Project**: Directly explains and validates our experimental results (negative $R^2$ of $-0.34$ and MAE of $3.57$ slots). This provides the necessary academic backing for your thesis defense, showing that these early metrics are a normal consequence of the **cold-start phase**.
+### Paper 8: Data-Driven Parking Information Systems
+* **Citation**: Gomari, S., Domakuntla, R., Knoth, C., & Antoniou, C. (2023). *"Development of a Data-Driven On-Street Parking Information System Using Enhanced Parking Features."* **IEEE Open Journal of Intelligent Transportation Systems**, Vol. 4, pp. 30–47.  
+* **DOI**: [10.1109/OJITS.2023.3235898](https://doi.org/10.1109/OJITS.2023.3235898)
+* **Methodology**: Developed a dynamic parking detection database framework that integrates parked-in and parked-out transitions to dynamically calculate availability.
+* **Key Findings**: Incorporating vehicle state transitions as dynamic features significantly improves the responsiveness of database replication and mapping models.
+* **Relevance to Project**: Supports our Firebase database structure which logs real-time vehicle arrival/departure transitions via the ESP32 Gateway to update user/admin dashboards.
