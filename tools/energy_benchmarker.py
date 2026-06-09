@@ -52,7 +52,7 @@ def main():
     print("-" * 65)
 
     host, auth = parse_credentials()
-    url = f"https://{host}/parking/history.json?auth={auth}&orderBy=\"$key\"&limitToLast=100"
+    url = f"https://{host}/parking/history.json?auth={auth}&orderBy=\"$key\"&limitToLast=100000"
     
     print("[*] Retrieving active Gateway power telemetry from Firebase...")
     avg_power_gateway_w = 45.0  # fallback

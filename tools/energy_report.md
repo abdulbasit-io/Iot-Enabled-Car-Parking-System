@@ -1,5 +1,5 @@
 # Energy Consumption Benchmarking & Battery Life Report
-**Generated on**: 2026-06-09 11:24:31  
+**Generated on**: 2026-06-09 17:03:15  
 **Academic Section Reference**: Section 2 - Energy Consumption Benchmarking
 
 ## 1. Experimental Methodology
@@ -24,7 +24,7 @@ Calculations are based on a standard **2500.0 mAh Li-ion cell** (3.7V nominal):
 * **Estimated Sensor Battery Life**: **`93.8 Days` (0.26 Years)**
 
 ## 4. Central Gateway Power Benchmark
-* **Average Operational Power (Active Link)**: `44.76 W` (derived from integrated ADC current telemetry logs).
+* **Average Operational Power (Active Link)**: `44.79 W` (derived from integrated ADC current telemetry logs).
 
 ---
 *Document prepared for submission to academic journals (Mechatronics Engineering Department, FUNAAB).*

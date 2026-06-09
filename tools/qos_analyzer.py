@@ -103,7 +103,7 @@ def main():
     
     # Fetch data
     print("[*] Downloading history telemetry logs from Firebase...")
-    url = f"https://{host}/parking/history.json?auth={auth}&orderBy=\"$key\"&limitToLast=300"
+    url = f"https://{host}/parking/history.json?auth={auth}&orderBy=\"$key\"&limitToLast=100000"
     
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
