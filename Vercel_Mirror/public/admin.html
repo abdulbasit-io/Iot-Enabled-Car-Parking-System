@@ -663,7 +663,7 @@
                         <!-- 24 hourly bars generated dynamically -->
                     </div>
                     <!-- X-Axis Labels -->
-                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-mute); font-weight: 600; padding: 0 4px;">
+                    <div id="timelineLabels" style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-mute); font-weight: 600; padding: 0 4px;">
                         <span>12 AM</span>
                         <span>4 AM</span>
                         <span>8 AM</span>
@@ -819,7 +819,7 @@
                         document.getElementById('lblNextPeakAdmin').innerText = "Normal occupancy expected";
                     }
                     
-                    // Render 24 hourly timeline bars
+                    // Render 24 hourly timeline bars and dynamic labels
                     const timelineVisual = document.getElementById('timelineVisual');
                     if (timelineVisual) {
                         timelineVisual.innerHTML = "";
@@ -849,6 +849,30 @@
                             
                             timelineVisual.appendChild(bar);
                         });
+                        
+                        // Dynamically update X-axis time labels to align with data starting hour
+                        const timelineLabels = document.getElementById('timelineLabels');
+                        if (timelineLabels) {
+                            timelineLabels.innerHTML = "";
+                            const formatTime12Hour = (timeStr) => {
+                                const [hourStr] = timeStr.split(':');
+                                let hour = parseInt(hourStr, 10);
+                                const ampm = hour >= 12 ? 'PM' : 'AM';
+                                hour = hour % 12;
+                                hour = hour ? hour : 12;
+                                return `${hour} ${ampm}`;
+                            };
+                            
+                            // Distribute 7 labels evenly across the 24 bars:
+                            const labelIndices = [0, 4, 8, 12, 16, 20, 23];
+                            labelIndices.forEach(idx => {
+                                if (hourlyForecasts[idx]) {
+                                    const span = document.createElement('span');
+                                    span.innerText = formatTime12Hour(hourlyForecasts[idx].time);
+                                    timelineLabels.appendChild(span);
+                                }
+                            });
+                        }
                     }
                 } else {
                     document.getElementById('lblNextPeakAdmin').innerText = "Waiting for model data...";

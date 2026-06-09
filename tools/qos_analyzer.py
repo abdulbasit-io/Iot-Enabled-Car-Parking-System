@@ -10,6 +10,8 @@ import json
 import urllib.request
 import subprocess
 import platform
+import math
+import time
 from datetime import datetime
 
 def parse_credentials():
@@ -38,8 +40,7 @@ def parse_credentials():
             
     return host, auth
 
-def ping_host(host):
-    print(f"[*] Measuring Network RTT (pinging {host})...")
+def icmp_ping_host(host):
     # Clean host from protocol or port
     clean_host = host.replace("https://", "").replace("http://", "").split("/")[0]
     
@@ -48,7 +49,7 @@ def ping_host(host):
     command = ["ping", param, "5", clean_host]
     
     try:
-        res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=10)
+        res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=5)
         output = res.stdout
         
         # Parse output for average RTT
@@ -60,16 +61,37 @@ def ping_host(host):
             match = re.findall(r"min/avg/max/mdev = [\d\.]+/(?P<avg>[\d\.]+)/", output)
             if match:
                 return float(match[0])
-            # Fallback regex
             match_fallback = re.findall(r"rtt min/avg/max/mdev = [\d\.]+/(?P<avg>[\d\.]+)/", output)
             if match_fallback:
                 return float(match_fallback[0])
-            
-        print("[!] Could not parse ping response details. Raw output:")
-        print(output[:200])
-    except Exception as e:
-        print(f"[!] Ping execution failed: {e}")
+    except Exception:
+        pass
     return None
+
+def http_ping_host(host, auth):
+    url = f"https://{host}/parking/current.json?auth={auth}"
+    rtts = []
+    # Make 5 HTTP requests to measure network-level round trip time to Firebase database
+    for _ in range(5):
+        try:
+            start = time.perf_counter()
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                resp.read()
+            end = time.perf_counter()
+            rtts.append((end - start) * 1000.0) # Convert to ms
+            time.sleep(0.1) # Small gap between requests
+        except Exception:
+            pass
+            
+    if rtts:
+        avg_rtt = sum(rtts) / len(rtts)
+        # Calculate P95 RTT
+        sorted_rtts = sorted(rtts)
+        p95_idx = min(len(sorted_rtts) - 1, int(len(sorted_rtts) * 0.95))
+        p95_rtt = sorted_rtts[p95_idx]
+        return avg_rtt, p95_rtt
+    return None, None
 
 def main():
     print("=" * 65)
@@ -90,7 +112,7 @@ def main():
     except Exception as e:
         print(f"[x] Error: Failed to fetch telemetry from Firebase: {e}")
         return
-
+ 
     if not data:
         print("[x] Error: No history data found in Firebase database.")
         return
@@ -109,6 +131,11 @@ def main():
         return
         
     print(f"[*] Successfully parsed {total_received} history records.")
+    print("[*] Running direct application-level HTTP RTT and ICMP benchmarks...")
+    
+    # Run latency benchmarks
+    icmp_rtt = icmp_ping_host(host)
+    http_avg, http_p95 = http_ping_host(host, auth)
     
     # Metrics Variables
     expected_interval_ms = 30000 # 30 seconds
@@ -117,6 +144,7 @@ def main():
     left_online_count = 0
     right_online_count = 0
     power_samples = []
+    reboot_count = 0
     
     first_time = records[0]["timestamp"]
     last_time = records[-1]["timestamp"]
@@ -139,6 +167,12 @@ def main():
             dt_server = rec["timestamp"] - prev["timestamp"]
             dt_uptime = rec["uptime"] - prev["uptime"]
             
+            # Detect ESP32 reboot: uptime went backwards
+            if dt_uptime < 0:
+                reboot_count += 1
+                # Skip jitter calculation for the reboot transition to prevent massive outliers
+                continue
+            
             # Packet loss estimation
             if dt_server > (expected_interval_ms * 1.5):
                 missed = round(dt_server / expected_interval_ms) - 1
@@ -154,17 +188,22 @@ def main():
     packet_loss_pct = (total_lost / total_sent * 100) if total_sent > 0 else 0.0
     reliability_pct = ((total_sent - total_lost) / total_sent * 100) if total_sent > 0 else 100.0
     
-    avg_jitter = sum(jitter_samples) / len(jitter_samples) if jitter_samples else 0.0
-    max_jitter = max(jitter_samples) if jitter_samples else 0.0
-    
+    # Advanced Statistics
+    if jitter_samples:
+        avg_jitter = sum(jitter_samples) / len(jitter_samples)
+        variance = sum((x - avg_jitter) ** 2 for x in jitter_samples) / len(jitter_samples)
+        std_jitter = math.sqrt(variance)
+        max_jitter = max(jitter_samples)
+    else:
+        avg_jitter = 0.0
+        std_jitter = 0.0
+        max_jitter = 0.0
+        
     avg_power = sum(power_samples) / len(power_samples) if power_samples else 0.0
     
     # Node Availability (ESP-NOW status)
     left_node_availability = (left_online_count / total_received * 100)
     right_node_availability = (right_online_count / total_received * 100)
-    
-    # Ping RTT
-    ping_rtt = ping_host(host)
     
     # Output Terminal Summary
     print("\n" + "=" * 65)
@@ -173,6 +212,7 @@ def main():
     print(f"Test Window Start      : {datetime.fromtimestamp(first_time/1000).strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Test Window End        : {datetime.fromtimestamp(last_time/1000).strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Total Duration         : {total_elapsed_ms / 3600000:.2f} hours")
+    print(f"Detected Device Reboots: {reboot_count}")
     print("-" * 65)
     print(f"Packets Transmitted    : {total_sent}")
     print(f"Packets Received (Rx)  : {total_received}")
@@ -181,11 +221,20 @@ def main():
     print(f"Network Reliability    : {reliability_pct:.2f} % (Target: > 99.0%)")
     print("-" * 65)
     print(f"Average Packet Jitter  : {avg_jitter:.1f} ms  (Target: < 120 ms)")
+    print(f"Jitter Std Dev (SD)    : {std_jitter:.1f} ms")
     print(f"Maximum Packet Jitter  : {max_jitter:.1f} ms")
-    if ping_rtt is not None:
-        print(f"Network RTT Latency    : {ping_rtt:.1f} ms  (Target: < 150 ms)")
+    print("-" * 65)
+    if http_avg is not None:
+        print(f"HTTP Latency (Avg RTT) : {http_avg:.1f} ms  (Target: < 200 ms)")
+        print(f"HTTP Latency (P95 RTT) : {http_p95:.1f} ms")
     else:
-        print(f"Network RTT Latency    : N/A (ICMP ping blocked)")
+        print("HTTP Latency (RTT)     : N/A (Failed HTTP handshake)")
+        
+    if icmp_rtt is not None:
+        print(f"ICMP Ping (Avg RTT)    : {icmp_rtt:.1f} ms  (Target: < 150 ms)")
+    else:
+        print("ICMP Ping (RTT)        : N/A (Blocked/Firewalled)")
+        
     print("-" * 65)
     print(f"Left ESP-NOW Node Link : {left_node_availability:.2f} % Uptime")
     print(f"Right ESP-NOW Node Link: {right_node_availability:.2f} % Uptime")
@@ -205,10 +254,14 @@ def main():
 |---|---|---|---|
 | **Packets Sent** | {total_sent} | - | N/A |
 | **Packets Received** | {total_received} | - | N/A |
+| **Device Reboots** | {reboot_count} | - | N/A |
 | **Packet Loss Rate** | {packet_loss_pct:.3f}% | < 1.00% | {"✅ PASSED" if packet_loss_pct < 1.0 else "❌ FAILED"} |
 | **Network Reliability** | {reliability_pct:.2f}% | > 99.00% | {"✅ PASSED" if reliability_pct > 99.0 else "❌ FAILED"} |
 | **Average Jitter** | {avg_jitter:.2f} ms | < 120.00 ms | {"✅ PASSED" if avg_jitter < 120.0 else "❌ FAILED"} |
-| **Ping Latency (RTT)** | {f"{ping_rtt:.1f} ms" if ping_rtt else "N/A"} | < 150.00 ms | {("✅ PASSED" if ping_rtt < 150.0 else "❌ FAILED") if ping_rtt else "Unknown"} |
+| **Jitter Std Dev (SD)** | {std_jitter:.2f} ms | - | N/A |
+| **HTTP Latency (Avg)** | {f"{http_avg:.1f} ms" if http_avg else "N/A"} | < 200.00 ms | {("✅ PASSED" if http_avg < 200.0 else "❌ FAILED") if http_avg else "Unknown"} |
+| **HTTP Latency (P95)** | {f"{http_p95:.1f} ms" if http_p95 else "N/A"} | - | N/A |
+| **ICMP Ping Latency** | {f"{icmp_rtt:.1f} ms" if icmp_rtt else "N/A (Blocked)"} | < 150.00 ms | {("✅ PASSED" if icmp_rtt < 150.0 else "❌ FAILED") if icmp_rtt else "Unknown"} |
 
 ## 2. ESP-NOW Client Node Link Availability
 * **Left Side Sensor Node (L1-L5)**: `{left_node_availability:.2f}%` Link Uptime Availability
