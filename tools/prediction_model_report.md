@@ -1,5 +1,5 @@
 # Section 5: Machine Learning Model Validation Report
-**Generated on**: 2026-06-09 12:27:38  
+**Generated on**: 2026-06-16 01:26:38  
 **Academic Reference**: Department of Mechatronics Engineering, FUNAAB
 
 ## 5.1 Overview
@@ -8,29 +8,29 @@ The core model utilized in production is the **HistGradientBoostingRegressor** (
 
 ## 5.2 Dataset Splits
 To evaluate generalization, the telemetry historical data logs were partitioned chronologically:
-* **Total Samples**: `152` resampled vectors (`Standard 15-Minute Intervals (lags: 24h, roll: 60m)`).
-* **Train Set (60%)**: `91` samples (used to fit parameters).
-* **Validation Set (20%)**: `30` samples (used to verify tuning).
-* **Testing Set (20%)**: `31` samples (unseen holdout for final evaluation).
+* **Total Samples**: `745` resampled vectors (`Standard 15-Minute Intervals (lags: 24h, roll: 60m)`).
+* **Train Set (60%)**: `447` samples (used to fit parameters).
+* **Validation Set (20%)**: `149` samples (used to verify tuning).
+* **Testing Set (20%)**: `149` samples (unseen holdout for final evaluation).
 
 ## 5.3 Performance Metrics & Targets
 | Metric | Target Threshold | Measured Value (HGBR 15m Target) | Validation Status |
 |---|---|---|---|
-| **Mean Absolute Error (MAE)** | < 1.00 slots | 3.5771 slots | ❌ FAILED |
-| **Root Mean Squared Error (RMSE)** | < 1.50 slots | 5.2568 slots | ❌ FAILED |
-| **Mean Absolute Percentage Error (MAPE)** | < 20.00% | 45.42% | ❌ FAILED |
-| **Coefficient of Determination ($R^2$ Score)** | > 0.8500 | -0.3423 | ❌ FAILED |
+| **Mean Absolute Error (MAE)** | < 1.00 slots | 0.7186 slots | ✅ PASSED |
+| **Root Mean Squared Error (RMSE)** | < 1.50 slots | 1.3266 slots | ✅ PASSED |
+| **Mean Absolute Percentage Error (MAPE)** | < 20.00% | 17.82% | ✅ PASSED |
+| **Coefficient of Determination ($R^2$ Score)** | > 0.8500 | 0.7708 | ❌ FAILED |
 
 ## 5.4 Time Series Cross-Validation
 To prevent lookahead bias (leaking future information into past training), we ran a rolling Walk-Forward Time Series Split:
 
 | Fold | Train Size | Test Size | MAE (slots) | RMSE (slots) | $R^2$ Score | MAPE (%) |
 |---|---|---|---|---|---|---|
-| Fold 1 | 27 | 25 | 0.148 | 0.148 | 0.0000 | 14.81% |
-| Fold 2 | 52 | 25 | 1.192 | 1.587 | -0.6579 | 56.87% |
-| Fold 3 | 77 | 25 | 2.714 | 3.926 | -0.6606 | 59.93% |
-| Fold 4 | 102 | 25 | 0.298 | 0.873 | 0.0000 | 29.85% |
-| Fold 5 | 127 | 25 | 4.385 | 5.781 | -0.6402 | 55.97% |
+| Fold 1 | 125 | 124 | 1.953 | 3.413 | 0.0034 | 68.94% |
+| Fold 2 | 249 | 124 | 1.690 | 2.097 | -53.7052 | 85.29% |
+| Fold 3 | 373 | 124 | 0.378 | 0.528 | 0.0000 | 18.91% |
+| Fold 4 | 497 | 124 | 0.068 | 0.119 | 0.0000 | 3.40% |
+| Fold 5 | 621 | 124 | 0.801 | 1.412 | 0.7738 | 18.38% |
 
 
 ## 5.5 Feature Engineering Configuration
@@ -42,12 +42,12 @@ Comparative evaluation of baseline guessing (Historical Average), Linear Regress
 
 | Model | Horizon | MAE (slots) | RMSE (slots) | MAPE (%) | $R^2$ Score | Inf. Time (ms) |
 |---|---|---|---|---|---|---|
-| **Historical Avg (Baseline)** | 15 min | 4.13 | 5.49 | 93.8% | 0.00 | < 1 |
-| **Historical Avg (Baseline)** | 1 hour | 4.23 | 5.58 | 93.1% | 0.00 | < 1 |
-| **Linear Regression** | 15 min | 1.35 | 2.23 | 24.2% | 0.76 | 4.09 |
-| **Linear Regression** | 1 hour | 3.59 | 5.01 | 62.3% | -0.21 | 3.54 |
-| **HistGradientBoostingRegressor** | 15 min | 3.58 | 5.26 | 45.4% | -0.34 | 479.95 |
-| **HistGradientBoostingRegressor** | 1 hour | 3.82 | 5.56 | 48.2% | -0.49 | 258.87 |
+| **Historical Avg (Baseline)** | 15 min | 1.53 | 3.16 | 24.1% | 0.00 | < 1 |
+| **Historical Avg (Baseline)** | 1 hour | 1.52 | 3.16 | 23.8% | 0.00 | < 1 |
+| **Linear Regression** | 15 min | 0.44 | 1.22 | 6.5% | 0.81 | 17.93 |
+| **Linear Regression** | 1 hour | 0.89 | 2.13 | 12.4% | 0.41 | 5.06 |
+| **HistGradientBoostingRegressor** | 15 min | 0.72 | 1.33 | 17.8% | 0.77 | 1023.00 |
+| **HistGradientBoostingRegressor** | 1 hour | 1.63 | 2.65 | 54.9% | 0.09 | 922.86 |
 
 *Note: HistGradientBoostingRegressor represents the production Random Forest / Gradient Boosting equivalent.*
 
@@ -56,12 +56,12 @@ To isolate the contribution of each engineered feature category, HGBR models wer
 
 | Model Configuration | MAE (15 min) | $\Delta$ from Full Model |
 |---|---|---|
-| Full model (all features) | 3.577 | — |
-| Without occupancy at same hour yesterday | 3.311 | -0.266 |
-| Without rolling mean (60 min) | 4.151 | +0.574 |
-| Without hour of day | 3.154 | -0.423 |
-| Without day of week | 3.311 | -0.266 |
-| Temporal features only | 4.151 | +0.574 |
+| Full model (all features) | 0.719 | — |
+| Without occupancy at same hour yesterday | 0.943 | +0.225 |
+| Without rolling mean (60 min) | 2.108 | +1.389 |
+| Without hour of day | 0.645 | -0.074 |
+| Without day of week | 0.637 | -0.082 |
+| Temporal features only | 2.164 | +1.445 |
 
 
 ---
