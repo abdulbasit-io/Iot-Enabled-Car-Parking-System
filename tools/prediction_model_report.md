@@ -1,5 +1,5 @@
 # Section 5: Machine Learning Model Validation Report
-**Generated on**: 2026-06-16 01:26:38  
+**Generated on**: 2026-06-16 01:38:32  
 **Academic Reference**: Department of Mechatronics Engineering, FUNAAB
 
 ## 5.1 Overview
@@ -44,10 +44,10 @@ Comparative evaluation of baseline guessing (Historical Average), Linear Regress
 |---|---|---|---|---|---|---|
 | **Historical Avg (Baseline)** | 15 min | 1.53 | 3.16 | 24.1% | 0.00 | < 1 |
 | **Historical Avg (Baseline)** | 1 hour | 1.52 | 3.16 | 23.8% | 0.00 | < 1 |
-| **Linear Regression** | 15 min | 0.44 | 1.22 | 6.5% | 0.81 | 17.93 |
-| **Linear Regression** | 1 hour | 0.89 | 2.13 | 12.4% | 0.41 | 5.06 |
-| **HistGradientBoostingRegressor** | 15 min | 0.72 | 1.33 | 17.8% | 0.77 | 1023.00 |
-| **HistGradientBoostingRegressor** | 1 hour | 1.63 | 2.65 | 54.9% | 0.09 | 922.86 |
+| **Linear Regression** | 15 min | 0.44 | 1.22 | 6.5% | 0.81 | 6.06 |
+| **Linear Regression** | 1 hour | 0.89 | 2.13 | 12.4% | 0.41 | 3.72 |
+| **HistGradientBoostingRegressor** | 15 min | 0.72 | 1.33 | 17.8% | 0.77 | 1274.24 |
+| **HistGradientBoostingRegressor** | 1 hour | 1.63 | 2.65 | 54.9% | 0.09 | 943.89 |
 
 *Note: HistGradientBoostingRegressor represents the production Random Forest / Gradient Boosting equivalent.*
 
